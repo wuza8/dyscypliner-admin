@@ -33,3 +33,63 @@
     background-color: #e24663;
     cursor: pointer;
 }
+
+.f-left{
+    float:left;
+}
+
+.f-right{
+    float:right;
+}
+
+#footer {
+    padding-top:10px;
+    padding-bottom: 10px;
+    width: 100%;
+}
+
+#footer-logo{
+    padding-left: 40px;
+}
+
+#footer-logout{
+    width: 150px;
+    margin-right: 10px;
+}
+
+#footer-logout:hover{
+    background-color: #e7e0ec;
+    cursor:pointer;
+}
+
+#footer-logout-text{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 29px;
+    font-size: 16px;
+    font-weight: bold;
+    width:65px;
+}
+#footer-logout-img{
+    padding-top:13px;
+    width: 20px;
+}
+
+#container{
+    padding-left:40px;
+    padding-right:40px;
+}
+
+.ta-left{
+    text-align: left;
+}
+
+.ta-right{
+    text-align: right;
+}
+
+.container-caption{
+    color: #ff2d54;
+    font-weight: bold;
+    font-size: 20px;
+}
