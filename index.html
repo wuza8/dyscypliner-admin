@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dyscypliner - Logowanie</title>
+    <link rel="stylesheet" href="main.css" />
+    <link rel="stylesheet" href="shared.css" />
+  </head>
+
+  <body>
+    <div id="login" class="route">
+        <div id="container" class="card-styling">
+        <div id="logo" class="primary-bigfont">Dyscypliner</div>
+        <form id="login-form">
+            <input
+            id="login-name"
+            class="primary-input"
+            type="text"
+            placeholder="nazwa użytkownika"
+            />
+            <br />
+            <input id="login-password" class="primary-input" type="password" placeholder="hasło" />
+            <br /><br /><br />
+            <div class="primary-button" onclick="login()">Zaloguj</div>
+        </form>
+        </div>
+    </div>
+    <div id="main" class="route">
+        <div id="footer" class="f-left">
+            <div class="primary-bigfont f-left" id="footer-logo">
+              <img src="logo.png" height="50" />
+            </div>
+            <div class="f-right" id="footer-logout">
+              <div id="footer-logout-text" class="f-left">Wyloguj</div>
+              <div id="footer-logout-img" class="f-left">
+                <img src="logout.svg" />
+              </div>
+            </div>
+          </div>
+        <div id="container">
+          <div id="container-left" class="f-left">
+            <div class="container-caption">
+              <div class="f-left">Stanowiska</div>
+              <div class="f-right" id="left-container-buttons">
+                <div id="masskara-button" class="f-left ta-right">
+                  <div class="f-left" id="masskara-text">Kara masowa</div>
+                  <div class="f-left" id="masskara-img">
+                    <img src="bolt.svg" width="25" height="25" />
+                  </div>
+                </div>
+                <div id="newdevice-button" class="f-left">+</div>
+              </div>
+            </div>
+    
+            <div class="f-left" id="user-blockplace">
+              <div class="user-block">
+                <div class="user-block-left">
+                  <div class="user-block-left-caption">Marek Mostowiak</div>
+                </div>
+                <div class="user-block-right">
+                  <div class="user-block-status">Dobrze</div>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <div id="container-right" class="f-left">
+            <div class="container-caption ta-right">Logi</div>
+            <div id="logs">Brak logów</div>
+          </div>
+        </div>
+      </body>
+    </div>
+
+    <div id="add" class="route">
+        
+    </div>
+
+    <script>
+        var state = [];
+
+        function route(name){
+            document.querySelectorAll(".route").forEach(e =>{
+                e.style.display = 'none';
+            });
+            document.getElementById(name).style.display = 'block';
+        }
+
+        function login(){
+            let login = document.getElementById("login-name").value;
+            let password = document.getElementById("login-password").value;
+
+            console.log("logging in with "+login+":"+password);
+
+            let socket = new WebSocket("ws://127.0.0.1:8080/ws/"+login+"/"+password);
+
+            socket.onopen = function(e) {
+                console.log("[open] Connection established");
+            };
+
+            socket.onmessage = function(event) {
+                console.log(`[message] Data received from server: ${event.data}`);
+
+                if(event.data.startsWith("INIT")){
+                    console.log("Initializing...");
+                    state = JSON.parse(event.data.substring(4));
+                    updateHTMLState();
+                    route('main');
+                }
+                else if(event.data.startsWith("NEWSTATUS")){
+                    console.log("Changing status...");
+                    let s = event.data.split(" ");
+                    state.forEach(device =>{
+                        if (device.id == s[1]){
+                            device.status = s[2];
+                        }
+                    })
+                    updateHTMLState();
+                    route('main');
+                }
+                else if(event.data.startsWith("NEWDEV")){
+                    console.log("Adding new device...");
+                    let s = event.data.split(" ");
+                    state.push({
+                        id: s[1],
+                        name: s[2],
+                        status: s[3]
+                    })
+                    updateHTMLState();
+                    route('main');
+                }
+
+            };
+
+            socket.onclose = function(event) {
+            if (event.wasClean) {
+                console.log(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+            } else {
+                // e.g. server process killed or network down
+                // event.code is usually 1006 in this case
+                console.log('[close] Connection died');
+            }
+            };
+
+            socket.onerror = function(error) {
+                console.log(`[error]`);
+            };
+        }
+
+        function logout(){
+
+        }
+
+        function updateHTMLState(){
+            console.log("updating!");
+            let place = document.getElementById("user-blockplace");
+            place.innerHTML = "";
+            
+            state.forEach(device => {
+                place.innerHTML +=  
+                '<div class="user-block">' +
+                    '<div class="user-block-left">' +
+                        '<div class="user-block-left-caption">'+device.name+'</div>' +
+                    '</div>'+
+                    '<div class="user-block-right">'+
+                        '<div class="user-block-status">'+device.status+'</div>' +
+                    '</div>'+
+                '</div>';
+            });
+        }
+
+        route('login');
+    </script>
+</html>
